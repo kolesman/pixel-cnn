@@ -116,8 +116,8 @@ model_opt = {'nr_resnet': args.nr_resnet, 'nr_filters': args.nr_filters,
 model = tf.make_template('model', model_spec)
 
 # run once for data dependent initialization of parameters
-gen_par = model(x_init, h_init, init=True,
-                dropout_p=args.dropout_p, **model_opt)
+gen_par_init = model(x_init, h_init, init=True,
+                     dropout_p=args.dropout_p, **model_opt)
 
 # keep track of moving average
 all_params = tf.trainable_variables()
@@ -221,7 +221,8 @@ with tf.Session() as sess:
             feed_dict = make_feed_dict(
                 train_data.next(args.init_batch_size), init=True)
             train_data.reset()  # rewind the iterator back to 0 to do one full epoch
-            sess.run(initializer, feed_dict)
+            sess.run(initializer)
+            sess.run(gen_par_init, feed_dict)
             print('initializing the model...')
             if args.load_params:
                 ckpt_file = args.save_dir + '/params_' + args.data_set + '.ckpt'
